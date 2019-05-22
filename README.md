@@ -33,12 +33,11 @@ You can use the provided gcp-setup.sh to configure gcp with your project on mac
 Modify the variable.tf file for the Terraform config with the right CREDENTIALS_FILE downloaded before, project and region
 
 ```yaml
-// Configure the Google Cloud provider
-provider "google" {
- credentials = "${file("CREDENTIALS_FILE.json")}"
- project     = "project-name"
- region      = "us-west1"
+variable "gcp_config_cred_path" {
+    type = "string"
+    default = "CREDENTIALS_FILE.json"
 }
+
 ```
 
 Set the project id from the first step to the project property and point the credentials section to the file that was downloaded in the last step. The provider “google” line indicates that you are using the Google Cloud Terraform provider and at this point you can run terraform init to download the latest version o the provider and build the .terraform directory.
