@@ -1,11 +1,15 @@
-gcloud projects add-iam-policy-binding juju-openstack-isep \
-    --member serviceAccount:juju-openstack-isep-sa@juju-openstack-isep.iam.gserviceaccount.com \
+#!/bin/bash
+
+PROJECT=""
+
+gcloud projects add-iam-policy-binding $PROJECT \
+    --member serviceAccount:$PROJECT-sa@$PROJEC.iam.gserviceaccount.com \
     --role roles/compute.instanceAdmin.v1
-gcloud projects add-iam-policy-binding juju-openstack-isep \
-    --member serviceAccount:juju-openstack-isep-sa@juju-openstack-isep.iam.gserviceaccount.com \
+gcloud projects add-iam-policy-binding $PROJECT\
+    --member serviceAccount:$PROJECT-sa@$PROJECT.iam.gserviceaccount.com \
     --role roles/compute.securityAdmin
 
-gcloud projects get-iam-policy juju-openstack-isep
+gcloud projects get-iam-policy $PROJECT
 
-gcloud iam service-accounts keys create juju-openstack-isep-sa.json \
-    --iam-account=juju-openstack-isep-sa@juju-openstack-isep.iam.gserviceaccount.com
+gcloud iam service-accounts keys create $PROJECT-sa.json \
+    --iam-account=$PROJECT-sa@$PROJECT.iam.gserviceaccount.com

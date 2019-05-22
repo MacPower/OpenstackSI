@@ -1,7 +1,7 @@
 provider "google" {
- credentials = "${file("juju-openstack-isep.json")}"
- project     = "juju-openstack-isep"
- region      = "europe-west2"
+    credentials = "${file(var.gcp_config_cred_path)}"
+    project     = "${var.gcp_config_project_name}"
+    region      = "${var.gcp_config_region}"
 }
 
 
@@ -13,19 +13,22 @@ resource "random_id" "instance_id" {
 // A single Google Cloud Engine instance
 resource "google_compute_instance" "deployment-vm" {
     name         = "deployment-vm-${random_id.instance_id.hex}"
-    machine_type = "n1-standard-1"
+    machine_type = "n1-standard-8"
     zone         = "europe-west2-c"
     can_ip_forward = true
+    allow_stopping_for_update = true
     boot_disk {
     initialize_params {
-        image = "ubuntu-1804-bionic-v20190514"
-        size  = 10
+        image = "ubuntu-1604-xenial-v20190514"
+        size  = 100
+        type = "pd-ssd"
         }
     }
 
- metadata_startup_script = "${file("./bootscript_deployment-vm.sh")}"
+ #metadata_startup_script = "${file("./bootscript_deployment-mono-vm.sh")}"
 
  network_interface {
+  
    network = "${google_compute_network.custom-network.name}"
    subnetwork = "${google_compute_subnetwork.internal-subnet.name}"
    access_config {
@@ -50,70 +53,37 @@ provisioner "file" {
     source      = "ssh/install_key.sh"
     destination = "/tmp/install_key.sh"
 }
+provisioner "file" {
+    source      = "deployment-mono-vm.sh"
+    destination = "/tmp/deployment-mono-vm.sh"
+}
+provisioner "file" {
+    source      = "get_images.sh"
+    destination = "/tmp/get_images.sh"
+}
+provisioner "file" {
+    source      = "set_flavors.sh"
+    destination = "/tmp/set_flavors.sh"
+}
+
 provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/install_key.sh",
       "/tmp/install_key.sh",
+      "chmod +x /tmp/deployment-mono-vm.sh",
+      "chmod +x /tmp/get_images.sh",
+      "chmod +x /set_flavors.sh"
     ]
-  }
-provisioner "remote-exec" {
-    inline = [
-      "export HOST0=${google_compute_instance.host-vm.network_interface.0.network_ip}",
-      "export HOST1=${google_compute_instance.host-vm-2.network_interface.0.network_ip}",
-    ]
-  }
+}
 
 connection {
         type     = "ssh"
         user     = "thomasbuatois"
-        private_key = "${file("/Users/thomasbuatois/.ssh/id_rsa")}"
+        private_key = "${file(var.gcp_config_ssh_keyfile_path)}"
     }
- tags = ["ssh"]
+ tags = ["ssh","http-s"]
 }
 
-resource "google_compute_instance" "host-vm" {
-    name         = "host-vm-${random_id.instance_id.hex}"
-    machine_type = "n1-standard-2"
-    zone         = "europe-west2-c"
-    can_ip_forward = true
-    boot_disk {
-    initialize_params {
-        image = "ubuntu-1804-bionic-v20190514"
-        size  = 50
-        }
-    }
-
- metadata_startup_script = "${file("./bootscript_host-vm.sh")}"
-
- network_interface {
-   network = "${google_compute_network.custom-network.name}"
-   subnetwork = "${google_compute_subnetwork.internal-subnet.name}"
- }
-
- tags = ["internal"]
-}
-resource "google_compute_instance" "host-vm-2" {
-    name         = "host-vm-2-${random_id.instance_id.hex}"
-    machine_type = "n1-standard-2"
-    zone         = "europe-west2-c"
-    can_ip_forward = true
-    boot_disk {
-    initialize_params {
-        image = "ubuntu-1804-bionic-v20190514"
-        size  = 50
-        }
-    }
-
- metadata_startup_script = "${file("./bootscript_host-vm.sh")}"
-
- network_interface {
-   network = "${google_compute_network.custom-network.name}"
-   subnetwork = "${google_compute_subnetwork.internal-subnet.name}"
- }
-
-
- tags = ["internal"]
-}
 
 resource "google_compute_network" "custom-network" {
   name                    = "custom-network"
@@ -128,7 +98,6 @@ resource "google_compute_subnetwork" "internal-subnet" {
 resource "google_compute_firewall" "ssh-access" {
   name    = "allow-ssh"
   network = "${google_compute_network.custom-network.name}"
-
   allow {
     protocol = "tcp"
     ports    = ["22"]
@@ -137,6 +106,18 @@ resource "google_compute_firewall" "ssh-access" {
   // Allow traffic from everywhere to instances with an ssh tag
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["ssh"]
+}
+resource "google_compute_firewall" "http-s-access" {
+  name    = "allow-https"
+  network = "${google_compute_network.custom-network.name}"
+  allow {
+    protocol = "tcp"
+    ports    = ["80","443"]
+  }
+
+  // Allow traffic from everywhere to instances with an ssh tag
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["http-s"]
 }
 resource "google_compute_firewall" "allow-internal-traffic" {
     name          = "allow-internal-traffic"
@@ -161,9 +142,4 @@ resource "google_compute_firewall" "allow-internal-traffic" {
 output "ip_deployment-vm" {
   value = "${google_compute_instance.deployment-vm.network_interface.0.access_config.0.nat_ip}"
 }
-output "ip_host-vm" {
-  value = "${google_compute_instance.host-vm.network_interface.0.network_ip}"
-}
-output "ip_host-vm-2" {
-  value = "${google_compute_instance.host-vm-2.network_interface.0.network_ip}"
-}
+
