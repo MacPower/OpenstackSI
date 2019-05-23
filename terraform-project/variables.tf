@@ -1,11 +1,11 @@
 variable "gcp_config_cred_path" {
     type = "string"
-    default = "juju-openstack-isep.json"
+    default = ""
 }
 
 variable "gcp_config_project_name" {
     type = "string"
-    default = "juju-openstack-isep"
+    default = ""
 }
 
 variable "gcp_config_region" {
@@ -14,5 +14,6 @@ variable "gcp_config_region" {
 }
 variable "gcp_config_ssh_keyfile_path" {
     type = "string"
-    default = "/Users/thomasbuatois/.ssh/id_rsa"
+    default = "~/.ssh/id_rsa"
 }
+

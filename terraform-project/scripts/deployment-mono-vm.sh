@@ -25,7 +25,7 @@ openstack-ansible setup-hosts.yml
 openstack-ansible setup-infrastructure.yml
 openstack-ansible setup-openstack.yml
 
-## install openstack additionnal components
+## install openstack additionnal components for authentification
 openstack-ansible os-keystone-install.yml
 
 ## Get Ubuntu and Centos Images to Glance
@@ -33,5 +33,13 @@ openstack-ansible os-keystone-install.yml
 
 ## Set Nova compute flavors
 /tmp/set_falvors.sh
+
+## Get Images
+
+/tmp/get_images.sh
+
+## Setup Network 
+
+/tmp/setup_network.sh
 
 echo "DONE"

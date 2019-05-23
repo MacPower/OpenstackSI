@@ -30,7 +30,7 @@ You can use the provided gcp-setup.sh to configure gcp with your project on mac
 
 ### Third Step: Setting up Terraform
 
-Modify the variable.tf file for the Terraform config with the right CREDENTIALS_FILE downloaded before, project and region
+Modify the variable.tf file for the Terraform config with the right CREDENTIALS_FILE downloaded before, project and region and ssh path
 
 ```yaml
 variable "gcp_config_cred_path" {

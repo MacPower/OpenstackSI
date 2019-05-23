@@ -25,7 +25,7 @@ resource "google_compute_instance" "deployment-vm" {
         }
     }
 
- #metadata_startup_script = "${file("./bootscript_deployment-mono-vm.sh")}"
+ metadata_startup_script = "${file("./scripts/bootscript_deployment-mono-vm.sh")}"
 
  network_interface {
   
@@ -54,25 +54,24 @@ provisioner "file" {
     destination = "/tmp/install_key.sh"
 }
 provisioner "file" {
-    source      = "deployment-mono-vm.sh"
-    destination = "/tmp/deployment-mono-vm.sh"
-}
-provisioner "file" {
-    source      = "get_images.sh"
+    source      = "./scripts/get_images.sh"
     destination = "/tmp/get_images.sh"
 }
 provisioner "file" {
-    source      = "set_flavors.sh"
+    source      = "./scripts/set_flavors.sh"
     destination = "/tmp/set_flavors.sh"
 }
-
+provisioner "file" {
+    source      = "./scripts/setup_network.sh"
+    destination = "/tmp/setup_network.sh"
+}
 provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/install_key.sh",
       "/tmp/install_key.sh",
-      "chmod +x /tmp/deployment-mono-vm.sh",
       "chmod +x /tmp/get_images.sh",
-      "chmod +x /set_flavors.sh"
+      "chmod +x /tmp/set_flavors.sh",
+      "chmod +x /tmp/setup_network.sh"
     ]
 }
 

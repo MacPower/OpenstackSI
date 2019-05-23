@@ -1,11 +1,18 @@
 #!/bin/bash
 
+## As root
+
+cd /root/
+
+## load source file 
+. openrc
+
 ## Create flavor (type of instance)
 openstack flavor create \
         --public t4.micro \
         --id auto \
         --ram 1024 \
-        --disk 1 \
+        --disk 4 \
         --vcpus 1 \
         --rxtx-factor 1
     

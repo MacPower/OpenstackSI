@@ -11,8 +11,7 @@ cd /root/
 wget http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1901.qcow2
 
 ### Get Ubuntu Bionic 1804 latest 
-wget http://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.vmdk
-
+wget http://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
 
 ### Upload images to glance
 
@@ -24,6 +23,6 @@ openstack image create \
 
 openstack image create \
         --container-format bare \
-        --disk-format vmdk \
-        --file bionic-server-cloudimg-amd64.vmdk \
+        --disk-format qcow2 \
+        --file bionic-server-cloudimg-amd64.img \
        Ubuntu-Bionic-x86_64
